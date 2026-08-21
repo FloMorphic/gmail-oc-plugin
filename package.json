@@ -1,7 +1,7 @@
 {
-  "name": "@flomorphic/gmail-plugin",
-  "version": "0.1.0",
-  "description": "Inflowenger plugin node for Gmail — send, search, read and label messages over the Gmail REST API, built on @inflowenger/node-plugin-sdk.",
+  "name": "@flomorphic/gmail-oc-plugin",
+  "version": "0.2.0",
+  "description": "FloMorphic plugin node for Gmail over OpenConnector — send, search, read and label messages as a Gmail account connected centrally in FloMorphic → Connect. Holds no Google credentials; proxies actions over flomorphic.svc.oc.* NATS. Built on @inflowenger/node-plugin-sdk.",
   "type": "module",
   "private": true,
   "engines": {

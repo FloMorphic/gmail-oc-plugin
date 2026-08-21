@@ -1,31 +1,35 @@
-// Command gmail-plugin is an Inflowenger plugin node for Gmail.
+// Command gmail-oc is a FloMorphic plugin node for Gmail, over OpenConnector.
 //
 // It exposes four actions on the workflow canvas — send an email, search
-// messages, get a message, and modify a message's labels — over a Gmail account
-// the platform ships with every call as a settings profile (body.settings).
+// messages, get a message, and modify a message's labels — but holds NO Gmail
+// credentials and makes NO Google calls. A Gmail account is connected once,
+// centrally, in FloMorphic → Connect (via OpenConnector / oomol). This plugin is
+// a request builder: its settings dialog picks which connected account to act as
+// (by alias), and every action asks the FloMorphic backend, over NATS, to run the
+// matching OpenConnector action as that account. The backend holds the credential.
 //
-// The plugin holds no Gmail configuration. It declares what an account needs
-// (see the settings form), and the platform stores that as a named settings
-// profile and folds the values into every call — so one running plugin can serve
-// many mailboxes and rotating a token needs no redeploy.
+// Because it reaches FloMorphic's central services (the `flomorphic.svc.oc.*`
+// subjects), this plugin must run with an OPEN (multi) runtime credential — a
+// strict, plugin-scoped credential cannot publish there. See the README.
 
 import { newPlugin, withDotEnv } from "@inflowenger/node-plugin-sdk";
 import { Registry } from "./actions/registry.js";
-import { hasBuiltinApp } from "./gmail/settings.js";
 
-const version = "v0.1.0";
+const version = "v0.2.0";
 
 async function main() {
   const envFile = process.env.INFLOW_ENV_FILE || ".env.inflow";
 
   // The dotenv carries the platform identity only — PLUGIN_ID, INFRA_CRED,
-  // INFRA_URL. Gmail credentials never live here.
+  // INFRA_URL. No Gmail or Google configuration ever lives here.
   const p = await newPlugin(withDotEnv(envFile));
 
-  const registry = new Registry();
+  // The registry sends its account/action requests over the plugin's NATS
+  // connection (p.send: request/reply with retry).
+  const registry = new Registry((subject, data) => p.send(subject, data));
 
   p.intro({
-    name: "GMAIL",
+    name: "Gmail (OpenConnector)",
     author: "FloMorphic",
     version,
     settings: registry.settingsForm(),
@@ -39,13 +43,9 @@ async function main() {
   p.start();
 
   const methods = actions.map((a) => a.method).join(", ");
-  console.log(`gmail plugin ${version} ready with ${actions.length} actions: ${methods}`);
-  console.log("gmail plugin: each call brings its own account in body.settings — bind a settings profile to the node");
-  console.log(
-    hasBuiltinApp()
-      ? "gmail plugin: built-in Google OAuth client configured — users just Sign in with Google (PKCE)"
-      : "gmail plugin: no built-in Google client (GOOGLE_OAUTH_CLIENT_ID unset) — each profile must paste its own credentials JSON",
-  );
+  console.log(`gmail-oc plugin ${version} ready with ${actions.length} actions: ${methods}`);
+  console.log("gmail-oc: this node acts as a Gmail account connected in FloMorphic → Connect");
+  console.log("gmail-oc: requests are proxied over flomorphic.svc.oc.* — needs an OPEN runtime credential");
 
   // start() only wires up subscriptions; the process has to stay alive to serve
   // them.
