@@ -91,14 +91,16 @@ reports; the plugin reads them at runtime):
 > in [`registry.ts`](src/actions/registry.ts) and `modifyForm` in
 > [`forms.ts`](src/actions/forms.ts). Its scope is read live like the others.
 
-## Runtime credential — must be OPEN
+## Install
 
-This plugin publishes on the `flomorphic.svc.oc.*` subjects, which live on the
-builtin-plugins NATS account. A **strict**, plugin-scoped credential cannot reach
-them — mint this plugin an **open (multi)** runtime credential (FloMorphic →
-Settings → *MultiPlugin Credential*, or the installer's multi option). The three
-values go in `.env.inflow` (`PLUGIN_ID`, `INFRA_CRED`, `INFRA_URL`) — see
-`.env.inflow.example`.
+Nothing special — install it like any other plugin: add it from its GitHub repo
+on the FloMorphic extension **Add plugin** page. Its runtime credential reaches
+the `flomorphic.svc.*` subjects out of the box (the NATS token allows
+`flomorphic.svc.>`), so an ordinary plugin credential works.
+
+The one prerequisite is a Gmail connection: complete it once in FloMorphic →
+**Connect**, where you connect the Gmail app through oomol OpenConnector. After
+that the node's account drop-down populates live from Connect and the plugin runs.
 
 ## Develop
 
