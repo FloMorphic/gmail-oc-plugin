@@ -24,9 +24,9 @@ import type { FormBuilder } from "@inflowenger/node-plugin-sdk";
 // into a drop-down of the connected accounts (see registry's metaAccountList,
 // which returns formkit.choose). The selected value is the account's alias.
 //
-// Kept as a builder (settingsFormDef) as well as a built form, because the picker
-// meta needs the builder to rebuild the dialog with the account drop-down.
-export const settingsFormDef = formkit
+// Built once (settingsForm) below; the picker meta rebuilds it with the account
+// drop-down (see registry's metaAccountList, formkit.choose(settingsForm, …)).
+const settingsFormDef = formkit
   .form("Gmail account (OpenConnector)")
   .describe(
     "This node acts as a Gmail account you connected in FloMorphic → Connect. Press " +
