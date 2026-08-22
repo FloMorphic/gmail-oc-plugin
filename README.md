@@ -102,6 +102,27 @@ The one prerequisite is a Gmail connection: complete it once in FloMorphic →
 **Connect**, where you connect the Gmail app through oomol OpenConnector. After
 that the node's account drop-down populates live from Connect and the plugin runs.
 
+## Request timeout
+
+Every action is a NATS round-trip to the FloMorphic backend, which then calls
+OpenConnector. A **send** returns fast, but a **search** (`fetch_emails`) does a
+list + up to 20 per-message reads on the backend, so it needs a longer deadline.
+The node sets **19s** in code (`withTimeout` in [src/main.ts](src/main.ts)),
+above the SDK's 5s default.
+
+Override it per deployment — without touching code — with the **`REQ_TIMEOUT`**
+env var (in **seconds**) in your `.env.inflow`. Raise it when your network or
+gateway is slow, lower it for a strict SLA:
+
+```env
+# .env.inflow
+REQ_TIMEOUT=50
+```
+
+Precedence: `REQ_TIMEOUT` (env) → `withTimeout(19)` (code) → 5s (SDK default). If
+a call still exceeds the deadline, the node reports a bare `TIMEOUT`; raise
+`REQ_TIMEOUT`.
+
 ## Develop
 
 ```bash

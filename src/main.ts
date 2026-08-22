@@ -19,9 +19,9 @@ import { Registry } from "./actions/registry.js";
 // per-message reads on the backend, well past the SDK's 5s default. Set the
 // send deadline above the backend's 60s upstream ceiling so a slow reply
 // arrives as a real result/error, not a bare NATS "TIMEOUT".
-const SEND_TIMEOUT_SECONDS = 19;
+const SEND_TIMEOUT_SECONDS = 35;
 
-const version = "v0.1.1";
+const version = "v0.1.2";
 
 async function main() {
   const envFile = process.env.INFLOW_ENV_FILE || ".env.inflow";
