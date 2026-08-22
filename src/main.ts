@@ -12,17 +12,23 @@
 // subjects), this plugin must run with an OPEN (multi) runtime credential — a
 // strict, plugin-scoped credential cannot publish there. See the README.
 
-import { newPlugin, withDotEnv } from "@inflowenger/node-plugin-sdk";
+import { newPlugin, withDotEnv, withTimeout } from "@inflowenger/node-plugin-sdk";
 import { Registry } from "./actions/registry.js";
 
-const version = "v0.2.0";
+// The proxy round-trip for a search (OC fetch_emails) is a list + up to 20
+// per-message reads on the backend, well past the SDK's 5s default. Set the
+// send deadline above the backend's 60s upstream ceiling so a slow reply
+// arrives as a real result/error, not a bare NATS "TIMEOUT".
+const SEND_TIMEOUT_SECONDS = 19;
+
+const version = "v0.1.1";
 
 async function main() {
   const envFile = process.env.INFLOW_ENV_FILE || ".env.inflow";
 
   // The dotenv carries the platform identity only — PLUGIN_ID, INFRA_CRED,
   // INFRA_URL. No Gmail or Google configuration ever lives here.
-  const p = await newPlugin(withDotEnv(envFile));
+  const p = await newPlugin(withDotEnv(envFile), withTimeout(SEND_TIMEOUT_SECONDS));
 
   // The registry sends its account/action requests over the plugin's NATS
   // connection (p.send: request/reply with retry).
