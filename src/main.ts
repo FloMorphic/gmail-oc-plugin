@@ -12,8 +12,28 @@
 // subjects), this plugin must run with an OPEN (multi) runtime credential — a
 // strict, plugin-scoped credential cannot publish there. See the README.
 
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { newPlugin, withDotEnv, withTimeout } from "@inflowenger/node-plugin-sdk";
 import { Registry } from "./actions/registry.js";
+
+// The manual is authored as Markdown next to this module (src/manual.md, copied
+// to dist/manual.md by the build) so the prose lives in a real doc, not a string
+// literal. The host renders it on the plugin's Extensions page and turns each
+// fenced ```inflow-meta block (a meta method name) into a Run button. Read it
+// relative to this file so it resolves under both `tsx src` (dev) and
+// `node dist` (prod); fall back to an empty manual if it is missing.
+function loadManual(): string {
+  try {
+    const here = dirname(fileURLToPath(import.meta.url));
+    return readFileSync(join(here, "manual.md"), "utf8");
+  } catch (e) {
+    console.warn("gmail-oc: manual.md not found, serving empty manual:", e);
+    return "";
+  }
+}
 
 // The proxy round-trip for a search (OC fetch_emails) is a list + up to 20
 // per-message reads on the backend, well past the SDK's 5s default. Set the
@@ -39,6 +59,7 @@ async function main() {
     author: "FloMorphic",
     version,
     settings: registry.settingsForm(),
+    manual: loadManual(),
   });
   p.requiredParams(registry.settings());
 
