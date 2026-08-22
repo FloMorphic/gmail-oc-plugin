@@ -51,7 +51,6 @@ async function main() {
   const methods = actions.map((a) => a.method).join(", ");
   console.log(`gmail-oc plugin ${version} ready with ${actions.length} actions: ${methods}`);
   console.log("gmail-oc: this node acts as a Gmail account connected in FloMorphic → Connect");
-  console.log("gmail-oc: requests are proxied over flomorphic.svc.oc.* — needs an OPEN runtime credential");
 
   // start() only wires up subscriptions; the process has to stay alive to serve
   // them.
