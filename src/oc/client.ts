@@ -36,7 +36,7 @@ interface ProxyReply {
   error?: string;
 }
 
-type Send = (subject: string, data: Uint8Array) => Promise<Msg>;
+type Send = (subject: string, data: Uint8Array) => Promise<Msg | undefined>;
 
 const enc = (v: unknown) => new TextEncoder().encode(JSON.stringify(v ?? {}));
 function dec<T>(data: Uint8Array): T {
@@ -63,6 +63,7 @@ export class Oc {
       PROXY_SUBJECT,
       enc({ connection: opts?.connection, method, path, query: opts?.query, body: opts?.body }),
     );
+    if (!msg) throw new Error(`OpenConnector ${path} timed out with no reply`);
     const reply = dec<ProxyReply>(msg.data);
     if (reply.error) throw new Error(reply.error);
     if (reply.status >= 400) throw new Error(`OpenConnector ${path} returned ${reply.status}`);

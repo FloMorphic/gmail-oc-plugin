@@ -42,7 +42,7 @@ const OC_ACTION: Record<ActionKey, string> = {
 export class Registry {
   private readonly oc: Oc;
 
-  constructor(send: (subject: string, data: Uint8Array) => Promise<Msg>) {
+  constructor(send: (subject: string, data: Uint8Array) => Promise<Msg | undefined>) {
     this.oc = new Oc(send);
   }
 
