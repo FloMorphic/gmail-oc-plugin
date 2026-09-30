@@ -14,7 +14,7 @@
     "dev": "tsx src/main.ts"
   },
   "dependencies": {
-    "@inflowenger/node-plugin-sdk": "^v0.1.7",
+    "@inflowenger/node-plugin-sdk": "^v0.1.9",
     "nats": "^2.29.3"
   },
   "devDependencies": {
